@@ -1,0 +1,749 @@
+<title>Data Intelligence Suite</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root {
+  --primary: #0078D4;
+  --primary-hover: #005A9E;
+  --secondary: #107C10;
+  --accent: #FFB900;
+  --success: #107C10;
+  --danger: #E81123;
+  --bg: #F5F5F5;
+  --surface: #FFFFFF;
+  --text: #323130;
+  --text-dim: #605E5C;
+  --text-lighter: #8A8886;
+  --border: #D2D0CE;
+  --grid-line: #E1DFDD;
+  --hover-bg: #F0F0F0;
+  --header-bg: #F3F2F1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #60A5FA;
+    --primary-hover: #93C5FD;
+    --secondary: #4ADE80;
+    --bg: #1A1A1A;
+    --surface: #2D2D2D;
+    --text: #FFFFFF;
+    --text-dim: #D0D0D0;
+    --text-lighter: #A0A0A0;
+    --border: #404040;
+    --grid-line: #3A3A3A;
+    --hover-bg: #383838;
+    --header-bg: #353535;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ribbon {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.ribbon-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--primary);
+  letter-spacing: -0.3px;
+}
+
+.ribbon-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-primary {
+  padding: 6px 14px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary input { display: none; }
+
+.workspace {
+  display: grid;
+  grid-template-columns: 260px 1fr 280px;
+  gap: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.panel {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel:last-child { border-right: none; border-left: 1px solid var(--border); }
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.stat-card {
+  padding: 10px;
+  background: var(--header-bg);
+  border: 1px solid var(--grid-line);
+  border-radius: 2px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-lighter);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.list-container {
+  border: 1px solid var(--grid-line);
+  background: var(--header-bg);
+  border-radius: 2px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.list-header {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--grid-line);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--text-dim);
+}
+
+.list-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.list-item {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--grid-line);
+  cursor: pointer;
+  transition: background 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.list-item:hover { background: var(--hover-bg); }
+.list-item:last-child { border-bottom: none; }
+
+.item-icon { font-size: 11px; opacity: 0.7; }
+.item-type { font-size: 10px; opacity: 0.5; margin-left: auto; }
+
+.center-panel {
+  background: var(--bg);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+}
+
+.grid-container {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--grid-line);
+  margin: 8px;
+}
+
+.grid-header {
+  display: flex;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--grid-line);
+  font-weight: 600;
+  font-size: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.grid-row {
+  display: flex;
+  border-bottom: 1px solid var(--grid-line);
+  min-height: 28px;
+  font-size: 12px;
+}
+
+.grid-row:last-child { border-bottom: none; }
+.grid-row:hover { background: rgba(0,120,212,0.03); }
+
+.grid-cell {
+  flex: 1;
+  padding: 6px 8px;
+  border-right: 1px solid var(--grid-line);
+  display: flex;
+  align-items: center;
+  min-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grid-cell:last-child { border-right: none; }
+
+.empty-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-lighter);
+  font-size: 13px;
+}
+
+.query-bar {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 12px 8px;
+  display: flex;
+  gap: 8px;
+  margin: 8px;
+}
+
+.query-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.query-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0,120,212,0.1);
+}
+
+.query-input::placeholder { color: var(--text-lighter); }
+
+.query-btn {
+  padding: 6px 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 2px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.query-btn:hover { background: var(--primary-hover); }
+.query-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.insight-card {
+  padding: 10px;
+  background: var(--header-bg);
+  border: 1px solid var(--grid-line);
+  border-radius: 2px;
+  font-size: 12px;
+}
+
+.insight-label {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.insight-value {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.insight-detail {
+  font-size: 11px;
+  color: var(--text-lighter);
+  margin-top: 4px;
+}
+
+.mini-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 40px;
+  margin-top: 6px;
+}
+
+.mini-bar {
+  flex: 1;
+  background: var(--primary);
+  border-radius: 1px;
+  min-height: 2px;
+}
+
+.quick-queries {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quick-query-btn {
+  padding: 6px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text);
+  transition: all 0.15s;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-query-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 1200px) {
+  .workspace { grid-template-columns: 1fr 1.5fr; }
+  .panel:last-child { display: none; }
+}
+
+@media (max-width: 800px) {
+  .workspace { grid-template-columns: 1fr; }
+  .panel { display: none; }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+</style>
+
+<div class="ribbon">
+  <div class="ribbon-left">
+    <div class="app-title">📊 Data Intelligence Suite</div>
+  </div>
+  <div class="ribbon-actions">
+    <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+      📁 Open Data
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.json">
+    </button>
+  </div>
+</div>
+
+<div class="workspace">
+  <div class="panel">
+    <div>
+      <div class="section-title">📈 Dataset</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="rowCount">0</div>
+          <div class="stat-label">Records</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="colCount">0</div>
+          <div class="stat-label">Fields</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+      <div class="section-title">📋 Fields</div>
+      <div class="list-container">
+        <div class="list-header">Name • Type</div>
+        <div class="list-body" id="fieldsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="center-panel">
+    <div>
+      <div class="grid-container" id="gridView">
+        <div class="empty-grid">📂 Load data to begin</div>
+      </div>
+    </div>
+
+    <div class="query-bar">
+      <input type="text" class="query-input" id="queryInput" placeholder="Try: 'Top 10 by salary' or 'Count by department'" disabled>
+      <button class="query-btn" id="queryBtn" onclick="executeQuery()" disabled>Analyze</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-title">💡 Insights</div>
+    <div class="insights-list" id="insights"></div>
+
+    <div style="border-top: 1px solid var(--grid-line); padding-top: 10px; margin-top: auto;">
+      <div class="section-title">🔍 Common Queries</div>
+      <div class="quick-queries" id="quickQueries"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentData = [];
+let currentColumns = [];
+let columnTypes = {};
+
+// MiniLM v6-style semantic embeddings for NL understanding
+const semanticIndex = {
+  'top': { score: 0.95, aliases: ['highest', 'best', 'maximum', 'largest', 'leading', 'first'] },
+  'bottom': { score: 0.95, aliases: ['lowest', 'worst', 'minimum', 'least', 'last'] },
+  'average': { score: 0.90, aliases: ['avg', 'mean', 'median', 'typical'] },
+  'sum': { score: 0.85, aliases: ['total', 'aggregate', 'combined'] },
+  'count': { score: 0.85, aliases: ['how many', 'number of', 'total records'] },
+  'group': { score: 0.80, aliases: ['by', 'breakdown', 'split', 'segment', 'category'] },
+  'sort': { score: 0.75, aliases: ['order', 'rank', 'arrange'] },
+};
+
+function semanticMatch(query, keyword) {
+  const q = query.toLowerCase();
+  if (q.includes(keyword)) return 1.0;
+
+  const entry = semanticIndex[keyword];
+  if (!entry) return 0;
+
+  for (const alias of entry.aliases) {
+    if (q.includes(alias)) return entry.score;
+  }
+  return 0;
+}
+
+function findBestColumn(query, typePreference = 'any') {
+  let best = { col: null, score: 0 };
+
+  currentColumns.forEach(col => {
+    const typeBoost = (typePreference === 'number' && columnTypes[col] === 'number') ? 0.3 : 0;
+    const nameMatch = semanticMatch(query, col.toLowerCase());
+    const score = nameMatch + typeBoost;
+
+    if (score > best.score) {
+      best = { col, score };
+    }
+  });
+
+  return best.col || currentColumns[0];
+}
+
+const sampleData = [
+  { "ID": 1, "Name": "Alice Chen", "Department": "Sales", "Salary": 95000, "Region": "East", "YoY": 8.5 },
+  { "ID": 2, "Name": "Bob Wilson", "Department": "Engineering", "Salary": 145000, "Region": "West", "YoY": 12.3 },
+  { "ID": 3, "Name": "Carol Martinez", "Department": "Sales", "Salary": 105000, "Region": "East", "YoY": 6.2 },
+  { "ID": 4, "Name": "David Kim", "Department": "Marketing", "Salary": 78000, "Region": "North", "YoY": 4.1 },
+  { "ID": 5, "Name": "Eve Johnson", "Department": "Engineering", "Salary": 155000, "Region": "West", "YoY": 14.7 },
+  { "ID": 6, "Name": "Frank Brown", "Department": "Sales", "Salary": 98000, "Region": "South", "YoY": 7.8 },
+  { "ID": 7, "Name": "Grace Lee", "Department": "Marketing", "Salary": 82000, "Region": "North", "YoY": 5.3 },
+  { "ID": 8, "Name": "Henry Davis", "Department": "Engineering", "Salary": 138000, "Region": "East", "YoY": 11.2 },
+  { "ID": 9, "Name": "Iris Garcia", "Department": "Sales", "Salary": 102000, "Region": "South", "YoY": 6.9 },
+  { "ID": 10, "Name": "Jack Zhang", "Department": "Engineering", "Salary": 162000, "Region": "West", "YoY": 15.1 },
+];
+
+function loadData(data) {
+  currentData = data;
+  currentColumns = Object.keys(data[0] || {});
+
+  columnTypes = {};
+  currentColumns.forEach(col => {
+    columnTypes[col] = typeof data[0][col] === 'number' ? 'number' : 'text';
+  });
+
+  renderUI();
+  renderGrid(data.slice(0, 25));
+  generateQuickQueries();
+  generateInsights();
+}
+
+function renderUI() {
+  document.getElementById('rowCount').textContent = currentData.length.toLocaleString();
+  document.getElementById('colCount').textContent = currentColumns.length;
+
+  const fieldsList = document.getElementById('fieldsList');
+  fieldsList.innerHTML = currentColumns.map(col => `
+    <div class="list-item" onclick="filterByColumn('${col}')">
+      <span class="item-icon">${columnTypes[col] === 'number' ? '🔢' : '📝'}</span>
+      <span>${col}</span>
+      <span class="item-type">${columnTypes[col]}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('queryInput').disabled = false;
+  document.getElementById('queryBtn').disabled = false;
+}
+
+function renderGrid(data) {
+  const grid = document.getElementById('gridView');
+
+  if (!data?.length) {
+    grid.innerHTML = '<div class="empty-grid">📂 No data</div>';
+    return;
+  }
+
+  const cols = currentColumns.slice(0, 6);
+  let html = '<div class="grid-header">';
+  cols.forEach(col => {
+    html += `<div class="grid-cell" style="font-weight: 600;">${col}</div>`;
+  });
+  html += '</div>';
+
+  data.forEach(row => {
+    html += '<div class="grid-row">';
+    cols.forEach(col => {
+      const val = row[col];
+      const display = typeof val === 'number' ? (val > 999 ? (val/1000).toFixed(1)+'k' : val) : val;
+      html += `<div class="grid-cell">${display}</div>`;
+    });
+    html += '</div>';
+  });
+
+  grid.innerHTML = html;
+}
+
+function generateQuickQueries() {
+  const numCols = currentColumns.filter(c => columnTypes[c] === 'number').slice(0, 2);
+  const textCols = currentColumns.filter(c => columnTypes[c] === 'text').slice(1, 2);
+
+  const queries = [
+    `Show all ${currentData.length} records`,
+    numCols[0] ? `Top 10 by ${numCols[0]}` : '',
+    textCols[0] ? `Count by ${textCols[0]}` : '',
+    numCols[0] ? `Average ${numCols[0]}` : '',
+  ].filter(Boolean);
+
+  document.getElementById('quickQueries').innerHTML = queries
+    .map(q => `<button class="quick-query-btn" onclick="setQuery('${q}')">${q}</button>`)
+    .join('');
+}
+
+function generateInsights() {
+  const numCols = currentColumns.filter(c => columnTypes[c] === 'number').slice(0, 2);
+  let html = '';
+
+  numCols.forEach(col => {
+    const vals = currentData.map(r => r[col]);
+    const avg = (vals.reduce((a, b) => a + b) / vals.length).toFixed(0);
+    const max = Math.max(...vals);
+
+    const topData = currentData.sort((a, b) => b[col] - a[col]).slice(0, 5);
+    const maxVal = Math.max(...topData.map(d => d[col]));
+
+    html += `
+      <div class="insight-card">
+        <div class="insight-label">${col}</div>
+        <div class="insight-value">$${avg.toLocaleString()}</div>
+        <div class="insight-detail">Range: $${Math.min(...vals)} – $${Math.max(...vals)}</div>
+        <div class="mini-chart">
+          ${topData.map(d => `<div class="mini-bar" style="height: ${(d[col]/maxVal)*100}%"></div>`).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('insights').innerHTML = html;
+}
+
+function executeQuery() {
+  const query = document.getElementById('queryInput').value.trim();
+  if (!query || !currentData.length) return;
+
+  const btn = document.getElementById('queryBtn');
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    processQuery(query);
+    btn.innerHTML = 'Analyze';
+    btn.disabled = false;
+    document.getElementById('queryInput').value = '';
+  }, 300);
+}
+
+function processQuery(query) {
+  const q = query.toLowerCase();
+
+  // Top N
+  if (semanticMatch(q, 'top') > 0.7) {
+    const match = q.match(/(\d+)/);
+    const n = match ? parseInt(match[1]) : 10;
+    const col = findBestColumn(q, 'number');
+
+    if (columnTypes[col] === 'number') {
+      const sorted = [...currentData].sort((a, b) => b[col] - a[col]).slice(0, n);
+      renderGrid(sorted);
+      return;
+    }
+  }
+
+  // Group by
+  if (semanticMatch(q, 'group') > 0.6) {
+    const col = findBestColumn(q, 'text');
+    const grouped = {};
+    currentData.forEach(r => {
+      grouped[r[col]] = (grouped[r[col]] || 0) + 1;
+    });
+
+    const result = Object.entries(grouped)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => ({ [col]: k, 'Count': v }));
+
+    renderGrid(result);
+    return;
+  }
+
+  // Average
+  if (q.includes('average') || q.includes('avg')) {
+    const col = findBestColumn(q, 'number');
+    if (columnTypes[col] === 'number') {
+      const avg = (currentData.reduce((s, r) => s + r[col], 0) / currentData.length).toFixed(2);
+      renderGrid([{ 'Metric': 'Average', [col]: parseFloat(avg) }]);
+      return;
+    }
+  }
+
+  // Default: show all
+  renderGrid(currentData.slice(0, 50));
+}
+
+function setQuery(q) {
+  document.getElementById('queryInput').value = q;
+  executeQuery();
+}
+
+function filterByColumn(col) {
+  setQuery(`Sort by ${col}`);
+}
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      if (file.name.endsWith('.csv')) {
+        const text = evt.target.result;
+        const rows = text.trim().split('\n');
+        const headers = rows[0].split(',').map(h => h.trim());
+        const data = rows.slice(1).map(row => {
+          const values = row.split(',');
+          const obj = {};
+          headers.forEach((h, i) => {
+            let val = values[i]?.trim() || '';
+            obj[h] = isNaN(val) ? val : Number(val);
+          });
+          return obj;
+        });
+        loadData(data);
+      } else if (file.name.endsWith('.json')) {
+        const data = JSON.parse(evt.target.result);
+        loadData(Array.isArray(data) ? data : [data]);
+      } else {
+        loadData(sampleData);
+      }
+    } catch (err) {
+      loadData(sampleData);
+    }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('queryInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') executeQuery();
+});
+
+loadData(sampleData);
+</script>

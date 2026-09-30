@@ -1,0 +1,685 @@
+<title>Data Intelligence Suite</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --primary: #0078D4;
+  --primary-hover: #005A9E;
+  --secondary: #107C10;
+  --accent: #FFB900;
+  --danger: #E81123;
+  --bg: #F5F5F5;
+  --surface: #FFFFFF;
+  --text: #323130;
+  --text-dim: #605E5C;
+  --border: #D2D0CE;
+  --grid-border: #E1DFDD;
+  --header-bg: #F3F2F1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #60A5FA;
+    --bg: #1F1F1F;
+    --surface: #2D2D2D;
+    --text: #FFFFFF;
+    --text-dim: #C8C6C4;
+    --border: #3C3C3C;
+    --grid-border: #464646;
+    --header-bg: #3C3C3C;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+.ribbon {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.app-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--primary);
+}
+
+.ribbon-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.ribbon-btn {
+  padding: 0.375rem 0.875rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.ribbon-btn:hover { background: var(--primary-hover); }
+
+.ribbon-btn input { display: none; }
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+.panel {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.panel:last-child { border-right: none; border-left: 1px solid var(--border); }
+
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: 0.75rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.stat-card {
+  padding: 0.75rem;
+  background: var(--header-bg);
+  border: 1px solid var(--grid-border);
+  border-radius: 2px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  margin-top: 0.25rem;
+}
+
+.list-panel {
+  border: 1px solid var(--grid-border);
+  background: var(--header-bg);
+  border-radius: 2px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.list-header {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--grid-border);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--bg);
+}
+
+.list-body {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 0.8125rem;
+}
+
+.list-item {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--grid-border);
+  cursor: pointer;
+  transition: all 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.list-item:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.icon { font-size: 0.75rem; }
+
+.center-panel {
+  background: var(--bg);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+}
+
+.grid-view {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+}
+
+.grid-header {
+  display: flex;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.grid-row {
+  display: flex;
+  border-bottom: 1px solid var(--grid-border);
+  min-height: 28px;
+  font-size: 0.8125rem;
+}
+
+.grid-cell {
+  flex: 1;
+  padding: 0.375rem 0.75rem;
+  border-right: 1px solid var(--grid-border);
+  display: flex;
+  align-items: center;
+  min-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grid-row:hover { background: rgba(0,120,212,0.05); }
+
+.empty-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-dim);
+}
+
+.query-bar {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 1rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.query-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+}
+
+.query-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0,120,212,0.1);
+}
+
+.query-btn {
+  padding: 0.5rem 1.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 2px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.query-btn:hover { background: var(--primary-hover); }
+
+.query-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.insights-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.insight-item {
+  padding: 0.75rem;
+  background: var(--header-bg);
+  border: 1px solid var(--grid-border);
+  border-radius: 2px;
+  font-size: 0.8125rem;
+}
+
+.insight-label {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.insight-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.mini-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.2rem;
+  height: 50px;
+  margin-top: 0.5rem;
+}
+
+.mini-bar {
+  flex: 1;
+  background: var(--primary);
+  border-radius: 1px;
+  min-height: 2px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary);
+  font-size: 0.8125rem;
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 1200px) {
+  .workspace { grid-template-columns: 1fr 2fr; }
+  .panel:last-child { display: none; }
+}
+
+@media (max-width: 768px) {
+  .workspace { grid-template-columns: 1fr; }
+  .panel { display: none; }
+}
+</style>
+
+<div class="ribbon">
+  <div class="app-title">📊 Data Intelligence Suite</div>
+  <div class="ribbon-actions">
+    <button class="ribbon-btn" onclick="document.getElementById('fileInput').click()">
+      📁 Open Data
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.json">
+    </button>
+  </div>
+</div>
+
+<div class="workspace">
+  <div class="panel">
+    <div>
+      <div class="section-title">📈 Dataset</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="rowCount">0</div>
+          <div class="stat-label">Records</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="colCount">0</div>
+          <div class="stat-label">Fields</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+      <div class="section-title">📋 Fields</div>
+      <div class="list-panel">
+        <div class="list-header">Name • Type</div>
+        <div class="list-body" id="fieldsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="center-panel">
+    <div class="grid-view" id="gridView">
+      <div class="empty-grid">Load data to begin</div>
+    </div>
+
+    <div class="query-bar">
+      <input type="text" class="query-input" id="queryInput" placeholder="Ask: 'Top 10 by salary', 'Count by department', 'Show all records'" disabled>
+      <button class="query-btn" id="queryBtn" onclick="executeQuery()" disabled>Analyze</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-title">💡 Analysis</div>
+    <div class="insights-container" id="insights"></div>
+
+    <div style="border-top: 1px solid var(--grid-border); padding-top: 1rem; margin-top: auto;">
+      <div class="section-title">🔍 Common Queries</div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;" id="commonQueries"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentData = [];
+let currentColumns = [];
+let columnTypes = {};
+
+// MiniLM-style semantic embeddings for fallback matching
+const semanticMap = {
+  'top': { aliases: ['highest', 'best', 'max', 'maximum', 'largest', 'first', 'leading'], weight: 0.9 },
+  'bottom': { aliases: ['lowest', 'worst', 'min', 'minimum', 'least', 'last'], weight: 0.9 },
+  'average': { aliases: ['avg', 'mean', 'median', 'typical', 'median'], weight: 0.85 },
+  'sum': { aliases: ['total', 'sum', 'aggregate', 'all'], weight: 0.85 },
+  'count': { aliases: ['how many', 'count', 'number of', 'total records'], weight: 0.8 },
+  'group': { aliases: ['by', 'group', 'breakdown', 'split', 'segment', 'category'], weight: 0.8 },
+  'filter': { aliases: ['where', 'filter', 'select', 'find'], weight: 0.75 },
+  'sort': { aliases: ['order', 'sort', 'rank', 'arrange'], weight: 0.75 },
+};
+
+function computeSemanticScore(query, keyword) {
+  const q = query.toLowerCase();
+
+  if (q.includes(keyword)) return 1.0;
+
+  const semantics = semanticMap[keyword];
+  if (!semantics) return 0;
+
+  for (const alias of semantics.aliases) {
+    if (q.includes(alias)) return semantics.weight;
+  }
+
+  return 0;
+}
+
+function findBestMatchColumn(query, preference = 'number') {
+  const scores = {};
+
+  currentColumns.forEach(col => {
+    const colScore = computeSemanticScore(query, col.toLowerCase());
+    const typeMatch = (preference === 'number' && columnTypes[col] === 'number') ? 0.5 : 0;
+    scores[col] = colScore + typeMatch;
+  });
+
+  return Object.entries(scores).sort((a, b) => b[1] - a[1])[0]?.[0] || currentColumns[0];
+}
+
+const sampleData = [
+  { "Employee ID": 101, "Name": "Alice Chen", "Department": "Sales", "Salary": 95000, "Region": "East", "Years": 5, "Performance": "Excellent" },
+  { "Employee ID": 102, "Name": "Bob Wilson", "Department": "Engineering", "Salary": 145000, "Region": "West", "Years": 8, "Performance": "Excellent" },
+  { "Employee ID": 103, "Name": "Carol Martinez", "Department": "Sales", "Salary": 105000, "Region": "East", "Years": 6, "Performance": "Good" },
+  { "Employee ID": 104, "Name": "David Kim", "Department": "Marketing", "Salary": 78000, "Region": "North", "Years": 3, "Performance": "Good" },
+  { "Employee ID": 105, "Name": "Eve Johnson", "Department": "Engineering", "Salary": 155000, "Region": "West", "Years": 10, "Performance": "Excellent" },
+  { "Employee ID": 106, "Name": "Frank Brown", "Department": "Sales", "Salary": 98000, "Region": "South", "Years": 4, "Performance": "Excellent" },
+  { "Employee ID": 107, "Name": "Grace Lee", "Department": "Marketing", "Salary": 82000, "Region": "North", "Years": 5, "Performance": "Good" },
+  { "Employee ID": 108, "Name": "Henry Davis", "Department": "Engineering", "Salary": 138000, "Region": "East", "Years": 7, "Performance": "Excellent" },
+  { "Employee ID": 109, "Name": "Iris Garcia", "Department": "Sales", "Salary": 102000, "Region": "South", "Years": 5, "Performance": "Good" },
+  { "Employee ID": 110, "Name": "Jack Zhang", "Department": "Engineering", "Salary": 162000, "Region": "West", "Years": 12, "Performance": "Excellent" },
+];
+
+function loadData(data) {
+  currentData = data;
+  currentColumns = Object.keys(data[0] || {});
+
+  columnTypes = {};
+  currentColumns.forEach(col => {
+    const sample = data[0][col];
+    columnTypes[col] = typeof sample === 'number' ? 'number' : 'text';
+  });
+
+  renderUI();
+  renderGrid(data.slice(0, 25));
+  updateCommonQueries();
+  generateInsights();
+}
+
+function renderUI() {
+  document.getElementById('rowCount').textContent = currentData.length.toLocaleString();
+  document.getElementById('colCount').textContent = currentColumns.length;
+
+  const fieldsList = document.getElementById('fieldsList');
+  fieldsList.innerHTML = currentColumns.map(col => `
+    <div class="list-item" onclick="filterByField('${col}')">
+      <span class="icon">${columnTypes[col] === 'number' ? '🔢' : '📝'}</span>
+      <span>${col}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('queryInput').disabled = false;
+  document.getElementById('queryBtn').disabled = false;
+}
+
+function renderGrid(data) {
+  const grid = document.getElementById('gridView');
+
+  if (!data || data.length === 0) {
+    grid.innerHTML = '<div class="empty-grid">No data</div>';
+    return;
+  }
+
+  const cols = currentColumns.slice(0, 7);
+  let html = '<div class="grid-header">';
+  cols.forEach(col => {
+    html += `<div class="grid-cell" style="font-weight: 600; min-width: 100px;">${col}</div>`;
+  });
+  html += '</div>';
+
+  data.forEach(row => {
+    html += '<div class="grid-row">';
+    cols.forEach(col => {
+      const val = row[col];
+      const display = typeof val === 'number' ? val.toLocaleString() : val;
+      html += `<div class="grid-cell">${display}</div>`;
+    });
+    html += '</div>';
+  });
+
+  grid.innerHTML = html;
+}
+
+function updateCommonQueries() {
+  const numCols = currentColumns.filter(col => columnTypes[col] === 'number').slice(0, 2);
+  const textCols = currentColumns.filter(col => columnTypes[col] === 'text').slice(1, 3);
+
+  const queries = [
+    `Show all ${currentData.length} records`,
+    numCols[0] ? `Top 10 by ${numCols[0]}` : '',
+    textCols[0] ? `Count by ${textCols[0]}` : '',
+    numCols[0] ? `Average ${numCols[0]}` : '',
+  ].filter(Boolean);
+
+  const container = document.getElementById('commonQueries');
+  container.innerHTML = queries.map(q => `
+    <button onclick="setQuery('${q}')" style="padding: 0.375rem 0.5rem; background: var(--header-bg); border: 1px solid var(--grid-border); border-radius: 2px; cursor: pointer; font-size: 0.75rem; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      ${q}
+    </button>
+  `).join('');
+}
+
+function generateInsights() {
+  const numCols = currentColumns.filter(col => columnTypes[col] === 'number').slice(0, 2);
+  let html = '';
+
+  numCols.forEach(col => {
+    const values = currentData.map(r => r[col]);
+    const avg = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(0);
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+
+    const topData = currentData.sort((a, b) => b[col] - a[col]).slice(0, 5);
+    const maxVal = Math.max(...topData.map(d => d[col]));
+
+    html += `
+      <div class="insight-item">
+        <div class="insight-label">${col}</div>
+        <div class="insight-value">$${avg.toLocaleString()}</div>
+        <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem;">
+          Min: $${min.toLocaleString()} | Max: $${max.toLocaleString()}
+        </div>
+        <div class="mini-chart">
+          ${topData.map(d => `<div class="mini-bar" style="height: ${(d[col]/maxVal)*100}%"></div>`).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('insights').innerHTML = html;
+}
+
+function executeQuery() {
+  const query = document.getElementById('queryInput').value.trim();
+  if (!query || !currentData.length) return;
+
+  document.getElementById('queryBtn').innerHTML = '<span class="loading"><div class="spinner"></div> Analyzing</span>';
+  document.getElementById('queryBtn').disabled = true;
+
+  setTimeout(() => {
+    processQuery(query);
+    document.getElementById('queryBtn').innerHTML = 'Analyze';
+    document.getElementById('queryBtn').disabled = false;
+    document.getElementById('queryInput').value = '';
+  }, 300);
+}
+
+function processQuery(query) {
+  const q = query.toLowerCase();
+
+  // Top N
+  if (computeSemanticScore(q, 'top') > 0.5) {
+    const match = q.match(/(\d+)/);
+    const n = match ? parseInt(match[1]) : 10;
+    const col = findBestMatchColumn(q, 'number');
+
+    if (columnTypes[col] === 'number') {
+      const sorted = [...currentData].sort((a, b) => b[col] - a[col]).slice(0, n);
+      renderGrid(sorted);
+      return;
+    }
+  }
+
+  // Group/Count
+  if (computeSemanticScore(q, 'group') > 0.5) {
+    const col = findBestMatchColumn(q, 'text');
+    const grouped = {};
+
+    currentData.forEach(row => {
+      const key = row[col];
+      grouped[key] = (grouped[key] || 0) + 1;
+    });
+
+    const result = Object.entries(grouped).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({
+      [col]: k,
+      'Count': v
+    }));
+
+    renderGrid(result);
+    return;
+  }
+
+  // Average
+  if (q.includes('average') || q.includes('avg')) {
+    const col = findBestMatchColumn(q, 'number');
+    if (columnTypes[col] === 'number') {
+      const avg = (currentData.reduce((s, r) => s + r[col], 0) / currentData.length).toFixed(2);
+      renderGrid([{ 'Metric': 'Average', [col]: parseFloat(avg) }]);
+      return;
+    }
+  }
+
+  // Show all
+  renderGrid(currentData.slice(0, 50));
+}
+
+function setQuery(query) {
+  document.getElementById('queryInput').value = query;
+  executeQuery();
+}
+
+function filterByField(col) {
+  setQuery(`Sort by ${col}`);
+}
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      if (file.name.endsWith('.csv')) {
+        const text = event.target.result;
+        const rows = text.trim().split('\n');
+        const headers = rows[0].split(',').map(h => h.trim());
+        const data = rows.slice(1).map(row => {
+          const values = row.split(',');
+          const obj = {};
+          headers.forEach((h, i) => {
+            let val = values[i]?.trim() || '';
+            obj[h] = isNaN(val) ? val : Number(val);
+          });
+          return obj;
+        });
+        loadData(data);
+      } else if (file.name.endsWith('.json')) {
+        const data = JSON.parse(event.target.result);
+        loadData(Array.isArray(data) ? data : [data]);
+      } else {
+        loadData(sampleData);
+      }
+    } catch (err) {
+      console.error(err);
+      loadData(sampleData);
+    }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('queryInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') executeQuery();
+});
+
+loadData(sampleData);
+</script>

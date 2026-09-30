@@ -1,0 +1,808 @@
+<title>Chat with Your Data</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root {
+  --primary: #3B82F6;
+  --secondary: #10B981;
+  --accent: #F59E0B;
+  --danger: #EF4444;
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --text: #1E293B;
+  --text-dim: #64748B;
+  --border: #E2E8F0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F172A;
+    --surface: #1E293B;
+    --text: #E2E8F0;
+    --text-dim: #94A3B8;
+    --border: #334155;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0F172A;
+  --surface: #1E293B;
+  --text: #E2E8F0;
+  --text-dim: #94A3B8;
+  --border: #334155;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 60px 1fr;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  font-size: 0.875rem;
+  color: var(--text-dim);
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 0;
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: 0.75rem;
+}
+
+.upload-box {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-box:hover {
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.upload-box input { display: none; }
+
+.upload-icon { font-size: 2.25rem; margin-bottom: 0.5rem; }
+
+.upload-text { font-size: 0.8125rem; color: var(--text-dim); }
+
+.data-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.stat-label {
+  font-size: 0.6875rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.data-preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.data-table {
+  font-size: 0.75rem;
+  border-collapse: collapse;
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+
+.data-table th {
+  background: var(--bg);
+  padding: 0.5rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  color: var(--primary);
+  position: sticky;
+  top: 0;
+}
+
+.data-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-table tr:hover { background: var(--bg); }
+
+.chat-container {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: var(--bg);
+}
+
+.messages {
+  overflow-y: auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.message {
+  display: flex;
+  gap: 0.75rem;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message.user { justify-content: flex-end; }
+
+.message-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.message.assistant .message-icon {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
+}
+
+.message.user .message-icon {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.message-content {
+  max-width: 70%;
+  padding: 0.875rem 1.25rem;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.message.user .message-content {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.message-result {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: var(--surface);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 0.8125rem;
+}
+
+.result-title {
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.result-table th {
+  background: var(--bg);
+  padding: 0.5rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+}
+
+.result-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.chart-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.375rem;
+  height: 140px;
+  padding: 0.5rem 0;
+}
+
+.bar {
+  flex: 1;
+  background: linear-gradient(to top, var(--primary), #60A5FA);
+  border-radius: 3px 3px 0 0;
+  position: relative;
+  min-height: 8px;
+  transition: all 0.3s ease;
+}
+
+.bar:hover {
+  filter: brightness(1.1);
+}
+
+.bar-label {
+  position: absolute;
+  bottom: -22px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 2px;
+}
+
+.input-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.quick-btn {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.quick-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.input-area {
+  display: flex;
+  gap: 0.75rem;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 0.875rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+input[type="text"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button {
+  padding: 0.875rem 1.75rem;
+  background: linear-gradient(135deg, var(--primary), #2563EB);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9375rem;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 2rem;
+}
+
+.empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--primary);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .message-content { max-width: 90%; }
+}
+</style>
+
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">📊</div>
+      Chat with Your Data
+    </div>
+    <div class="header-info">
+      <span id="dataStatus">Ready to upload</span>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="sidebar">
+      <div>
+        <div class="section-title">📁 Upload Data</div>
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">📤</div>
+          <div class="upload-text">Click to upload Excel or CSV</div>
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.json">
+        </div>
+      </div>
+
+      <div id="statsContainer" style="display: none;">
+        <div class="section-title">📈 Data Stats</div>
+        <div class="data-stats">
+          <div class="stat">
+            <div class="stat-value" id="rowCount">0</div>
+            <div class="stat-label">Rows</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="colCount">0</div>
+            <div class="stat-label">Columns</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-preview">
+        <div class="section-title">👀 Preview</div>
+        <table class="data-table" id="previewTable" style="display: none;">
+          <thead id="previewHead"></thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+        <div id="noDataMsg" style="color: var(--text-dim); font-size: 0.875rem; text-align: center;">
+          No data loaded
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-container">
+      <div class="messages" id="messages">
+        <div class="empty-state">
+          <div class="empty-icon">💬</div>
+          <p style="font-weight: 500; margin-bottom: 0.5rem;">Upload your data to get started</p>
+          <p style="font-size: 0.875rem;">Supported formats: Excel, CSV, JSON</p>
+        </div>
+      </div>
+
+      <div class="input-footer">
+        <div class="quick-actions" id="quickActions" style="display: none;">
+          <button class="quick-btn" onclick="quickQuery('Show all data')">📋 All Data</button>
+          <button class="quick-btn" onclick="quickQuery('Show summary')">📊 Summary</button>
+          <button class="quick-btn" onclick="quickQuery('Top 10')">🔝 Top 10</button>
+        </div>
+
+        <div class="input-area">
+          <input type="text" id="queryInput" placeholder="Ask me anything about your data..." disabled>
+          <button id="sendBtn" onclick="sendQuery()" disabled>Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentData = [];
+let currentColumns = [];
+
+const sampleData = [
+  { Name: "Alice", Department: "Sales", Salary: 85000, Region: "East", Performance: "Excellent" },
+  { Name: "Bob", Department: "Engineering", Salary: 120000, Region: "West", Performance: "Good" },
+  { Name: "Carol", Department: "Sales", Salary: 95000, Region: "East", Performance: "Excellent" },
+  { Name: "David", Department: "Marketing", Salary: 75000, Region: "North", Performance: "Good" },
+  { Name: "Eve", Department: "Engineering", Salary: 130000, Region: "West", Performance: "Excellent" },
+  { Name: "Frank", Department: "Sales", Salary: 90000, Region: "South", Performance: "Good" },
+  { Name: "Grace", Department: "Marketing", Salary: 78000, Region: "North", Performance: "Excellent" },
+  { Name: "Henry", Department: "Engineering", Salary: 125000, Region: "East", Performance: "Good" },
+];
+
+function loadData(data) {
+  currentData = data;
+  currentColumns = Object.keys(data[0] || {});
+  updateUI();
+  addMessage("assistant", `✅ Data loaded! ${data.length} rows, ${currentColumns.length} columns. Ask me anything!`);
+}
+
+function updateUI() {
+  const table = document.getElementById("previewTable");
+  const head = document.getElementById("previewHead");
+  const body = document.getElementById("previewBody");
+
+  head.innerHTML = currentColumns.map(c => `<th>${c}</th>`).join("");
+  body.innerHTML = currentData.slice(0, 5).map(row =>
+    `<tr>${currentColumns.map(c => `<td>${row[c]}</td>`).join("")}</tr>`
+  ).join("");
+
+  table.style.display = "table";
+  document.getElementById("noDataMsg").style.display = "none";
+  document.getElementById("statsContainer").style.display = "block";
+  document.getElementById("rowCount").textContent = currentData.length;
+  document.getElementById("colCount").textContent = currentColumns.length;
+  document.getElementById("dataStatus").textContent = `${currentData.length} rows loaded`;
+  document.getElementById("queryInput").disabled = false;
+  document.getElementById("sendBtn").disabled = false;
+  document.getElementById("quickActions").style.display = "flex";
+}
+
+function sendQuery() {
+  const query = document.getElementById("queryInput").value.trim();
+  if (!query || currentData.length === 0) return;
+
+  addMessage("user", query);
+  document.getElementById("queryInput").value = "";
+  setTimeout(() => processQuery(query), 200);
+}
+
+function processQuery(query) {
+  const q = query.toLowerCase();
+
+  // Summary
+  if (q.includes("summary")) {
+    let html = "<div class='message-result'><div class='result-title'>📊 Data Summary</div>";
+    html += `<p>Total records: <strong>${currentData.length}</strong></p>`;
+
+    const numCols = currentColumns.filter(c => typeof currentData[0][c] === "number");
+    if (numCols.length > 0) {
+      numCols.forEach(col => {
+        const values = currentData.map(r => r[col]);
+        const sum = values.reduce((a, b) => a + b, 0);
+        const avg = (sum / values.length).toFixed(2);
+        const max = Math.max(...values);
+        const min = Math.min(...values);
+        html += `<p><strong>${col}:</strong> Avg ${avg}, Min ${min}, Max ${max}</p>`;
+      });
+    }
+    html += "</div>";
+    addMessage("assistant", html, true);
+    return;
+  }
+
+  // Top N
+  const topMatch = q.match(/top (\d+)/i);
+  if (topMatch) {
+    const n = parseInt(topMatch[1]);
+    const numCol = currentColumns.find(c => typeof currentData[0][c] === "number");
+    if (numCol) {
+      const sorted = [...currentData].sort((a, b) => b[numCol] - a[numCol]).slice(0, n);
+      displayResults(`Top ${n} by ${numCol}`, sorted);
+      return;
+    }
+  }
+
+  // Group by
+  const groupMatch = q.match(/(?:by|group by) (\w+)/i);
+  if (groupMatch) {
+    const col = findColumn(groupMatch[1]);
+    if (col) {
+      const grouped = {};
+      currentData.forEach(row => {
+        const key = row[col];
+        grouped[key] = (grouped[key] || 0) + 1;
+      });
+      displayGrouped(col, grouped);
+      return;
+    }
+  }
+
+  // Search
+  if (q.includes("search") || q.includes("find")) {
+    const term = q.replace(/search|find/gi, "").trim();
+    const results = currentData.filter(row =>
+      Object.values(row).some(v => String(v).toLowerCase().includes(term.toLowerCase()))
+    );
+    if (results.length > 0) {
+      displayResults(`Found ${results.length} matching rows`, results.slice(0, 10));
+      return;
+    }
+  }
+
+  // Average
+  if (q.includes("average") || q.includes("avg")) {
+    const numCol = currentColumns.find(c => typeof currentData[0][c] === "number");
+    if (numCol) {
+      const avg = (currentData.reduce((s, r) => s + r[numCol], 0) / currentData.length).toFixed(2);
+      addMessage("assistant", `📊 Average ${numCol}: <strong>$${avg.toLocaleString()}</strong>`);
+      return;
+    }
+  }
+
+  // Total
+  if (q.includes("total") || q.includes("sum")) {
+    const numCol = currentColumns.find(c => typeof currentData[0][c] === "number");
+    if (numCol) {
+      const total = currentData.reduce((s, r) => s + r[numCol], 0);
+      addMessage("assistant", `📊 Total ${numCol}: <strong>$${total.toLocaleString()}</strong>`);
+      return;
+    }
+  }
+
+  // Show all
+  if (q.includes("show") || q.includes("all")) {
+    displayResults("All Data", currentData.slice(0, 20));
+    return;
+  }
+
+  displayResults("Query Results", currentData.slice(0, 10));
+}
+
+function findColumn(search) {
+  return currentColumns.find(c => c.toLowerCase().includes(search.toLowerCase())) || currentColumns[0];
+}
+
+function displayResults(title, data, cols = null) {
+  if (!cols) cols = currentColumns.slice(0, 5);
+  const html = `
+    <div class="message-result">
+      <div class="result-title">${title}</div>
+      <table class="result-table">
+        <thead><tr>${cols.map(c => `<th>${c}</th>`).join("")}</tr></thead>
+        <tbody>${data.slice(0, 10).map(row =>
+          `<tr>${cols.map(c => `<td>${row[c]}</td>`).join("")}</tr>`
+        ).join("")}</tbody>
+      </table>
+    </div>
+  `;
+  addMessage("assistant", html, true);
+}
+
+function displayGrouped(col, grouped) {
+  const entries = Object.entries(grouped).sort((a, b) => b[1] - a[1]);
+  const html = `
+    <div class="message-result">
+      <div class="result-title">Count by ${col}</div>
+      <table class="result-table">
+        <thead><tr><th>${col}</th><th>Count</th></tr></thead>
+        <tbody>${entries.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("")}</tbody>
+      </table>
+      <div class="chart-container">
+        <div class="bar-chart">
+          ${entries.slice(0, 8).map(([k, v]) => {
+            const maxVal = Math.max(...entries.map(e => e[1]));
+            const height = (v / maxVal) * 100;
+            return `<div class="bar" style="height: ${height}%"><span class="bar-label">${k}</span></div>`;
+          }).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+  addMessage("assistant", html, true);
+}
+
+function addMessage(role, content, isHTML = false) {
+  const messagesDiv = document.getElementById("messages");
+
+  if (messagesDiv.querySelector(".empty-state")) {
+    messagesDiv.innerHTML = "";
+  }
+
+  const msgDiv = document.createElement("div");
+  msgDiv.className = `message ${role}`;
+
+  const icon = document.createElement("div");
+  icon.className = "message-icon";
+  icon.textContent = role === "user" ? "👤" : "🤖";
+
+  const content_div = document.createElement("div");
+  content_div.className = "message-content";
+  if (isHTML) {
+    content_div.innerHTML = content;
+  } else {
+    content_div.textContent = content;
+  }
+
+  if (role === "user") {
+    msgDiv.appendChild(content_div);
+    msgDiv.appendChild(icon);
+  } else {
+    msgDiv.appendChild(icon);
+    msgDiv.appendChild(content_div);
+  }
+
+  messagesDiv.appendChild(msgDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function quickQuery(query) {
+  document.getElementById("queryInput").value = query;
+  sendQuery();
+}
+
+// File upload
+document.getElementById("fileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      if (file.name.endsWith(".csv")) {
+        const text = event.target.result;
+        const rows = text.trim().split("\n");
+        const headers = rows[0].split(",").map(h => h.trim());
+        const data = rows.slice(1).map(row => {
+          const values = row.split(",");
+          const obj = {};
+          headers.forEach((h, i) => {
+            let val = values[i]?.trim() || "";
+            obj[h] = isNaN(val) ? val : Number(val);
+          });
+          return obj;
+        });
+        loadData(data);
+      } else if (file.name.endsWith(".json")) {
+        const data = JSON.parse(event.target.result);
+        loadData(Array.isArray(data) ? data : [data]);
+      } else {
+        loadData(sampleData);
+        addMessage("assistant", "📌 Using sample data (Excel parsing requires backend). Try asking: 'Show all' or 'Top 5 by Salary'");
+      }
+    } catch (err) {
+      loadData(sampleData);
+      addMessage("assistant", "⚠️ Error loading file. Using sample data instead.");
+    }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById("queryInput").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendQuery();
+});
+
+// Load sample data on startup
+loadData(sampleData);
+</script>
